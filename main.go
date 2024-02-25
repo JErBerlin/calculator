@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	strAusdr := "42"
+	strAusdr := "abc"
 	rd := strings.NewReader(strAusdr)
 
 	a, err := baueAusdr(rd)
@@ -19,32 +19,41 @@ func main() {
 		return
 	}
 
+	ergebnis, err :=  a.Wert()
 	if v, ok := a.(Verkn); ok {
 		fmt.Printf("Ausdruck ist die Verknuepfung: %d %s %d\n", v.A(), string(v.Operation()), v.B())
-		fmt.Printf("Wert(%s) = %d\n", strAusdr, a.Wert())
+		if err != nil {
+			fmt.Printf("Wert(%s) = error: %s", strAusdr, err)
+		} else {
+			fmt.Printf("Wert(%s) = %d\n", strAusdr, ergebnis)
+		}
 	} else if _, ok := a.(Ganzezahl); ok {
 		fmt.Println("Ausdruck ist eine Ganzezahl")
-		fmt.Printf("Wert(%s) = %d\n", strAusdr, a.Wert())
+		if err != nil {
+			fmt.Printf("Wert(%s) = error: %s", strAusdr, err)
+		} else {
+			fmt.Printf("Wert(%s) = %d\n", strAusdr, ergebnis)
+		}
 	} else {
 		fmt.Println("Ausdruck war unlesbar. Unfug.")
 	}
 }
 
 type Ausdr interface {
-	Wert() int
+	Wert() (int, error)
 }
 
 type Ganzezahl struct {
 	n int
 }
 
-func (z Ganzezahl) Wert() int {
-	return z.n
+func (z Ganzezahl) Wert() (int, error) {
+	return z.n, nil
 }
 
 // Verkn definiert ein Interface für arithmetische Verknüpfungen.
 type Verkn interface {
-	Wert() int       // Gibt das Ergebnis der Verknüpfung zurück.
+	Wert() (int, error)       // Gibt das Ergebnis der Verknüpfung zurück.
 	Operation() rune // Gibt das Symbol der Operation zurück.
 	A() int          // Gibt den Wert von Operand A zurück.
 	B() int          // Gibt den Wert von Operand B zurück.
@@ -65,8 +74,8 @@ func (s *Summe) SetB(b int) {
 	s.b = b
 }
 
-func (s Summe) Wert() int {
-	return s.a + s.b
+func (s Summe) Wert() (int, error) {
+	return s.a + s.b, nil
 }
 
 func (s Summe) Operation() rune {
@@ -94,8 +103,8 @@ func (r *Reste) SetB(b int) {
 	r.b = b
 }
 
-func (r Reste) Wert() int {
-	return r.a - r.b
+func (r Reste) Wert() (int, error) {
+	return r.a - r.b, nil
 }
 
 func (r Reste) Operation() rune {
@@ -123,8 +132,8 @@ func (m *Mult) SetB(b int) {
 	m.b = b
 }
 
-func (m Mult) Wert() int {
-	return m.a * m.b
+func (m Mult) Wert() (int, error) {
+	return m.a * m.b, nil
 }
 
 func (m Mult) Operation() rune {
@@ -152,11 +161,14 @@ func (d *Div) SetB(b int) {
 	d.b = b
 }
 
-func (d Div) Wert() int {
+func (d Div) Wert() (int, error) {
 	if d.b == 0 {
-		return 0 // TODO: return a more meaningful value like Inf or an error
+		return 0, fmt.Errorf("Teilen durch Null") // TODO: return a more meaningful value like Inf or an error
 	}
-	return d.a / d.b
+	if d.a == 0 {
+		return 0, nil
+	}
+	return d.a / d.b, nil
 }
 
 func (d Div) Operation() rune {

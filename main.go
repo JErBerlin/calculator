@@ -39,14 +39,17 @@ func main() {
 	}
 }
 
+// Ausdr repräsentiert einen Ausdruck, der ausgewertet werden kann.
 type Ausdr interface {
 	Wert() (int, error)
 }
 
+// Ganzezahl ist der (numerischer) Ausdruck einer Ganzezahl
 type Ganzezahl struct {
 	n int
 }
 
+// Wert gibt den numersichen Wert der Ganzezahl zurück
 func (z Ganzezahl) Wert() (int, error) {
 	return z.n, nil
 }
@@ -189,8 +192,6 @@ type StrZahl struct {
 }
 
 // Hinzu fügt eine Ziffer zur Zeichenkette hinzu.
-// Beim leeren hinzufuegen bekommt man den numerischen Wert zurueck.
-// Beim hinzufuegen von 'R' wird die Zeichenkette geleert.
 func (z *StrZahl) Hinzu(d rune) {
 	z.zahlAlsString += string(d)
 }
@@ -205,6 +206,7 @@ func (z *StrZahl) Reset() {
 	z.zahlAlsString = ""
 }
 
+// baueAusdr baut einen Ausdruck aus einer Rune-Zeichenkette im Reader
 func baueAusdr(r io.Reader) (Ausdr, error) {
 	reader := bufio.NewReader(r)
 

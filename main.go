@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 
-	ergebnis, err :=  a.Wert()
+	ergebnis, err := a.Wert()
 	if v, ok := a.(Verkn); ok {
 		fmt.Printf("Ausdruck ist die Verknuepfung: %d %s %d\n", v.A(), string(v.Operation()), v.B())
 		if err != nil {
@@ -56,12 +56,12 @@ func (z Ganzezahl) Wert() (int, error) {
 
 // Verkn definiert ein Interface für arithmetische Verknüpfungen.
 type Verkn interface {
-	Wert() (int, error)       // Gibt das Ergebnis der Verknüpfung zurück.
-	Operation() rune // Gibt das Symbol der Operation zurück.
-	A() int          // Gibt den Wert von Operand A zurück.
-	B() int          // Gibt den Wert von Operand B zurück.
-	SetA(int)        // Setzt den Wert von Operand A.
-	SetB(int)        // Setzt den Wert von Operand B.
+	Wert() (int, error) // Gibt das Ergebnis der Verknüpfung zurück.
+	Operation() rune    // Gibt das Symbol der Operation zurück.
+	A() int             // Gibt den Wert von Operand A zurück.
+	B() int             // Gibt den Wert von Operand B zurück.
+	SetA(int)           // Setzt den Wert von Operand A.
+	SetB(int)           // Setzt den Wert von Operand B.
 }
 
 // Summe repräsentiert eine Addition.

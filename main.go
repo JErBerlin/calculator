@@ -241,45 +241,62 @@ func baueAusdr(r io.Reader) (Ausdr, error) {
 		// lese Summe-Verknuepfung
 		case symbol == '+':
 			s := new(Summe)
-			s.SetA(sz.Wert()) // speichere den bereits gelesenen Operanden a
-			sz.Reset()        // reset Zahlenleser, um Operanden b zu lesen
-			exp = s           // speichere die Summe als Ausdrueck exp
+			w, err := sz.Wert()
+			if err != nil {
+				return exp, fmt.Errorf("baueAusdr: vor der Verknüpfung erwarteter Operanden A nicht vorhanden")
+			}
+			s.SetA(w)  // speichere erstem Operanden A im Ausdruck
+			sz.Reset() // reset Zahlenleser, um Operanden b zu lesen
+			exp = s    // speichere die Summe als Ausdrueck exp
 
 		// lese Reste-Verknuepfung
 		case symbol == '-':
 			r := new(Reste)
-			r.SetA(sz.Wert()) // speichere den bereits gelesenen Operanden a
-			sz.Reset()        // reset Zahlenleser, um Operanden b zu lesen
-			exp = r           // speichere die Reste als Ausdrueck exp
+			w, err := sz.Wert()
+			if err != nil {
+				return exp, fmt.Errorf("baueAusdr: vor der Verknüpfung erwarteter Operanden A nicht vorhanden")
+			}
+			r.SetA(w)
+			sz.Reset()
+			exp = r
 
 		// lese Mult-Verknuepfung
 		case symbol == '*':
 			m := new(Mult)
-			m.SetA(sz.Wert()) // speichere den bereits gelesenen Operanden a
-			sz.Reset()        // reset Zahlenleser, um Operanden b zu lesen
-			exp = m           // speichere die Mult als Ausdrueck exp
+			w, err := sz.Wert()
+			if err != nil {
+				return exp, fmt.Errorf("baueAusdr: vor der Verknüpfung erwarteter Operanden A nicht vorhanden")
+			}
+			m.SetA(w)
+			sz.Reset()
+			exp = m
 
 		// lese Div-Verknuepfung
 		case symbol == '/':
 			d := new(Div)
-			d.SetA(sz.Wert()) // speichere den bereits gelesenen Operanden a
-			sz.Reset()        // reset Zahlenleser, um Operanden b zu lesen
-			exp = d           // speichere die Div als Ausdrueck exp
+			w, err := sz.Wert()
+			if err != nil {
+				return exp, fmt.Errorf("baueAusdr: vor der Verknüpfung erwarteter Operanden A nicht vorhanden")
+			}
+			d.SetA(w)
+			sz.Reset()
+			exp = d
 
 		default:
 			weiterLesen = false
 		}
 	}
 
-	if sz.zahlAlsString == "" { // etwas ist schiefgelaufen: wir brauchen wenigstens eine Zahl
+	w, err := sz.Wert() // Die gelesene Zeichenkette ist eine Zahl alleine oder der zweite Operand b
+	if err != nil {     // etwas ist schiefgelaufen: wir brauchen wenigstens eine Zahl
 		return exp, fmt.Errorf("Zahlen konnten nicht vollstaendig gelesen werden")
 	}
 
 	// wenn der Ausdrueck eine Verknuepfung ist, fehlt noch den zweiten Operanden zu speichern
 	if v, ok := exp.(Verkn); ok {
-		v.SetB(sz.Wert())
-	} else {
-		exp = Ganzezahl{sz.Wert()}
+		v.SetB(w)
+	} else { // sonst speichern wir eine Zahl alleine
+		exp = Ganzezahl{w}
 	}
 
 	return exp, nil

@@ -197,9 +197,12 @@ func (z *StrZahl) Hinzu(d rune) {
 }
 
 // Wert konvertiert die Zeichenkettendarstellung der Zahl in eine Ganzzahl.
-func (z *StrZahl) Wert() int {
-	i, _ := strconv.Atoi(z.zahlAlsString) // Fehler ignorieren, da immer eine Zahl erwartet wird
-	return i
+func (z *StrZahl) Wert() (int, error) {
+	if z.zahlAlsString == "" {
+		return 0, fmt.Errorf("Wert von StrZahl: Zeichenkette ist leer")
+	}
+	i, err := strconv.Atoi(z.zahlAlsString)
+	return i, err
 }
 
 func (z *StrZahl) Reset() {

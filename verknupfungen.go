@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// ErrInvalidOperation zeigt an, dass die Operation nicht erkannt wird.
-var ErrInvalidOperation = errors.New("ungültige Operation")
+// ErrUngultigeOperation zeigt an, dass die Operation nicht erkannt wird.
+var ErrUngultigeOperation = errors.New("ungültige Operation")
 
 // Verkn definiert ein Interface für arithmetische Verknüpfungen.
 type Verkn interface {
@@ -120,10 +120,7 @@ func (d *Div) SetB(b int) {
 
 func (d Div) Wert() (int, error) {
 	if d.b == 0 {
-		return 0, fmt.Errorf("Teilen durch Null") // TODO: return a more meaningful value like Inf or an error
-	}
-	if d.a == 0 {
-		return 0, nil
+		return 0, fmt.Errorf("Teilen durch Null")
 	}
 	return d.a / d.b, nil
 }
@@ -143,18 +140,14 @@ func (d Div) B() int {
 func leseVerknupfung(symbol rune) (Verkn, error) {
 	switch symbol {
 	case '+':
-		return new(Summe), nil
-
+		return &Summe{}, nil
 	case '-':
-		return new(Reste), nil
-
+		return &Reste{}, nil
 	case '*':
-		return new(Mult), nil
-
+		return &Mult{}, nil
 	case '/':
-		return new(Div), nil
-
+		return &Div{}, nil
 	default:
+		return nil, ErrUngultigeOperation
 	}
-	return nil, ErrInvalidOperation
 }

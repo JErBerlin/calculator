@@ -16,65 +16,61 @@ type Ausdr interface {
 func baueAusdr(r io.Reader) (Ausdr, error) {
 	reader := bufio.NewReader(r)
 
-	var exp Ausdr
-	var op Verkn
-	var str StrZahl // String um die gelesenen Ziffer zu speichern und dann zum Nummerischen Wert zu konvertieren
+	var aktuelleVerkn Verkn
+	var strZahl StrZahl // String um die gelesenen Ziffer zu speichern und dann zum Nummerischen Wert zu konvertieren
 
 	// lese eine grupe der Form A | A + B | A - B | A * B | A / B
 	// noch keine Parenthesis erlaubt
 	for {
 		symbol, _, err := reader.ReadRune()
 
-		// EOF error ist kein eigentlicher Fehler
 		if err == io.EOF {
 			break // Dateiende
 		}
 		// sonstiger Fehler, stop
 		if err != nil {
-			return exp, err
+			return nil, fmt.Errorf("Fehler beim Lesen: %v", err)
 		}
+
 		// sortiere Leerzeichen aus
 		if unicode.IsSpace(symbol) {
 			continue
 		}
 
-		if unicode.IsDigit(symbol) { // lese eine Ziffer von Operanden a oder Operanden b nin die Stringzahl
-			str.Hinzu(symbol)
+		// lese eine Ziffer von Operanden a oder Operanden b in die Stringzahl
+		if unicode.IsDigit(symbol) {
+			strZahl.Hinzu(symbol)
 			continue
 		}
 
 		// kein leerzeichen und keine Ziffer: versuche, eine Verknupfung zu lesen
-		op, err = leseVerknupfung(symbol)
-		if err != nil {
-			return exp, fmt.Errorf("leseVerkn: fehler beim Lesen der Verknüpfung: %s", err)
+		if aktuelleVerkn, err = leseVerknupfung(symbol); err != nil {
+			return nil, fmt.Errorf("leseVerkn: Fehler beim Lesen der Verknüpfung: %s", err)
 		}
 
-		// speichere erstem Operanden A in die Verknupfung
-		w, err := str.Wert()
+		// speichere Operanden A in die Verknupfung
+		zahl, err := strZahl.Wert()
 		if err != nil {
-			return exp, fmt.Errorf("baueAusdr: vor der Verknüpfung erwarteter Operanden A nicht vorhanden")
+			return nil, fmt.Errorf("baueAusdr: Fehler beim Konvertieren Zeichen zu Zahl für Operanden")
 		}
-		op.SetA(w)
+		aktuelleVerkn.SetA(zahl)
 
-		// speichere die Verknupfung als Ausdrueck exp
-		exp = op
-
-		// reset Zahlenleser, um Operanden b zu lesen
-		str.Reset()
+		// bereit für Operanden B
+		strZahl.Reset()
 	}
 
 	// Die Zeichenkette eintält eine Zahl alleine oder den zweiten Operanden B
-	w, err := str.Wert()
-	if err != nil { // etwas ist schiefgelaufen: wir brauchen wenigstens eine Zahl
-		return exp, fmt.Errorf("baueAusdr: die Zeichenkette enthält keine Zahl")
+	letzteZahl, err := strZahl.Wert()
+	if err != nil {
+		// etwas ist schiefgelaufen: wir brauchen wenigstens eine Zahl
+		return nil, fmt.Errorf("die Zeichenkette enthält keine Zahl: %s", err)
 	}
 
-	// wenn der Ausdrueck eine Verknuepfung ist, speichern wir B
-	if v, ok := exp.(Verkn); ok {
-		v.SetB(w)
-	} else { // sonst speichern wir eine Zahl alleine
-		exp = Ganzezahl{w}
+	// der Ausdrueck ist entweder eine Zahl oder eine Verknupfung
+	if aktuelleVerkn == nil {
+		return Ganzezahl{letzteZahl}, nil
 	}
 
-	return exp, nil
+	aktuelleVerkn.SetB(letzteZahl)
+	return aktuelleVerkn, nil
 }

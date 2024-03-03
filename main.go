@@ -1,25 +1,31 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"strings"
 )
 
 func main() {
-	strAusdr := "1 + 2"
-	rd := strings.NewReader(strAusdr)
+	// Zeichenkette, die ausgewertet werden soll
+	strAusdr := "3*(1+2)"
 
-	ausdruck, err := baueAusdr(rd)
+	r := strings.NewReader(strAusdr)
+	br := bufio.NewReader(r)
+
+	// parse Ausdruck
+	ausdr, err := ParseAusdruck(br)
 	if err != nil {
-		fmt.Printf("Fehler: %v\n", err)
+		fmt.Printf("Fehler beim Parsen des Ausdrucks: %s\n", err)
 		return
 	}
 
-	wert, err := ausdruck.Wert()
+	// Auswertung des Ausdrucks
+	w, err := ausdr.Wert()
 	if err != nil {
-		fmt.Printf("Fehler beim Auswerten: %v\n", err)
+		fmt.Printf("Fehler bei der Auswertung des Ausdrucks: %s\n", err)
 		return
 	}
 
-	fmt.Printf("Wert(%s) = %d\n", strAusdr, wert)
+	fmt.Printf("Wert(%s) = %d\n", strAusdr, w)
 }

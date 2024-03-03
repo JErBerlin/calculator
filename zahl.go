@@ -37,3 +37,7 @@ func (z *StrZahl) Wert() (int, error) {
 func (z *StrZahl) Reset() {
 	z.zahlAlsString = ""
 }
+
+func (z *StrZahl) Leer() bool {
+	return z.zahlAlsString == ""
+}

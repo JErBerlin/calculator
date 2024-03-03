@@ -49,11 +49,11 @@ func baueAusdr(r io.Reader) (Ausdr, error) {
 		}
 
 		// speichere Operanden A in die Verknupfung
-		zahl, err := strZahl.Wert()
+		z, err := strZahl.Wert()
 		if err != nil {
 			return nil, fmt.Errorf("baueAusdr: Fehler beim Konvertieren Zeichen zu Zahl für Operanden")
 		}
-		aktuelleVerkn.SetA(zahl)
+		aktuelleVerkn.SetA(Zahl{z})
 
 		// bereit für Operanden B
 		strZahl.Reset()
@@ -71,6 +71,6 @@ func baueAusdr(r io.Reader) (Ausdr, error) {
 		return Zahl{letzteZahl}, nil
 	}
 
-	aktuelleVerkn.SetB(letzteZahl)
+	aktuelleVerkn.SetB(Zahl{letzteZahl})
 	return aktuelleVerkn, nil
 }

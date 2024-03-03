@@ -5,13 +5,16 @@ import (
 	"strconv"
 )
 
-// Ganzezahl ist der (numerischer) Ausdruck einer Ganzezahl
-type Ganzezahl struct {
-	n int
+// Num ist ein eskalarer Wert: int in dem Fall
+type Num int
+
+// Zahl ist der (numerischer) Ausdruck einer Zahl
+type Zahl struct {
+	n Num
 }
 
-// Wert gibt den numersichen Wert der Ganzezahl zurück
-func (z Ganzezahl) Wert() (int, error) {
+// Wert gibt den numersichen Wert der Zahl zurück
+func (z Zahl) Wert() (Num, error) {
 	return z.n, nil
 }
 
@@ -26,12 +29,12 @@ func (z *StrZahl) Hinzu(d rune) {
 }
 
 // Wert konvertiert die Zeichenkettendarstellung der Zahl in eine Ganzzahl.
-func (z *StrZahl) Wert() (int, error) {
+func (z *StrZahl) Wert() (Num, error) {
 	if z.zahlAlsString == "" {
 		return 0, fmt.Errorf("Wert von StrZahl: Zeichenkette ist leer")
 	}
 	i, err := strconv.Atoi(z.zahlAlsString)
-	return i, err
+	return Num(i), err
 }
 
 func (z *StrZahl) Reset() {

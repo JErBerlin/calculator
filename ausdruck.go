@@ -9,7 +9,7 @@ import (
 
 // Ausdr repräsentiert einen Ausdruck, der ausgewertet werden kann.
 type Ausdr interface {
-	Wert() (int, error)
+	Wert() (Num, error)
 }
 
 // baueAusdr baut einen Ausdruck aus einer Rune-Zeichenkette im Reader
@@ -44,7 +44,7 @@ func baueAusdr(r io.Reader) (Ausdr, error) {
 		}
 
 		// kein leerzeichen und keine Ziffer: versuche, eine Verknupfung zu lesen
-		if aktuelleVerkn, err = leseVerknupfung(symbol); err != nil {
+		if aktuelleVerkn, err = NeueBinop(symbol); err != nil {
 			return nil, fmt.Errorf("leseVerkn: Fehler beim Lesen der Verknüpfung: %s", err)
 		}
 
@@ -68,7 +68,7 @@ func baueAusdr(r io.Reader) (Ausdr, error) {
 
 	// der Ausdrueck ist entweder eine Zahl oder eine Verknupfung
 	if aktuelleVerkn == nil {
-		return Ganzezahl{letzteZahl}, nil
+		return Zahl{letzteZahl}, nil
 	}
 
 	aktuelleVerkn.SetB(letzteZahl)

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // ErrUngultigeOperation zeigt an, dass die Operation nicht erkannt wird.
@@ -10,144 +11,73 @@ var ErrUngultigeOperation = errors.New("ungültige Operation")
 
 // Verkn definiert ein Interface für arithmetische Verknüpfungen.
 type Verkn interface {
-	Wert() (int, error) // Gibt das Ergebnis der Verknüpfung zurück.
+	Wert() (Num, error) // Gibt das Ergebnis der Verknüpfung zurück.
 	Operation() rune    // Gibt das Symbol der Operation zurück.
-	A() int             // Gibt den Wert von Operand A zurück.
-	B() int             // Gibt den Wert von Operand B zurück.
-	SetA(int)           // Setzt den Wert von Operand A.
-	SetB(int)           // Setzt den Wert von Operand B.
+	A() Num             // Gibt den Wert von Operand A zurück.
+	B() Num             // Gibt den Wert von Operand B zurück.
+	SetA(Num)           // Setzt den Wert von Operand A.
+	SetB(Num)           // Setzt den Wert von Operand B.
 }
 
-// Summe repräsentiert eine Addition.
-type Summe struct {
-	a, b int
+// Binop repräsentiert eine binäre Operation (Addition, Subtraktion, Multiplikation, Division).
+type Binop struct {
+	a, b Num
+	op   rune
 }
 
-func (s *Summe) SetA(a int) {
-	s.a = a
+// SetA setzt den Wert von Operand A.
+func (p *Binop) SetA(a Num) {
+	p.a = a
 }
 
-func (s *Summe) SetB(b int) {
-	s.b = b
+// SetB setzt den Wert von Operand B.
+func (p *Binop) SetB(b Num) {
+	p.b = b
 }
 
-func (s Summe) Wert() (int, error) {
-	return s.a + s.b, nil
-}
-
-func (s Summe) Operation() rune {
-	return '+'
-}
-
-func (s Summe) A() int {
-	return s.a
-}
-
-func (s Summe) B() int {
-	return s.b
-}
-
-// Reste repräsentiert eine Subtraktion.
-type Reste struct {
-	a, b int
-}
-
-func (r *Reste) SetA(a int) {
-	r.a = a
-}
-
-func (r *Reste) SetB(b int) {
-	r.b = b
-}
-
-func (r Reste) Wert() (int, error) {
-	return r.a - r.b, nil
-}
-
-func (r Reste) Operation() rune {
-	return '-'
-}
-
-func (r Reste) A() int {
-	return r.a
-}
-
-func (r Reste) B() int {
-	return r.b
-}
-
-// Mult repräsentiert eine Multiplikation.
-type Mult struct {
-	a, b int
-}
-
-func (m *Mult) SetA(a int) {
-	m.a = a
-}
-
-func (m *Mult) SetB(b int) {
-	m.b = b
-}
-
-func (m Mult) Wert() (int, error) {
-	return m.a * m.b, nil
-}
-
-func (m Mult) Operation() rune {
-	return '*'
-}
-
-func (m Mult) A() int {
-	return m.a
-}
-
-func (m Mult) B() int {
-	return m.b
-}
-
-// Div repräsentiert eine Division.
-type Div struct {
-	a, b int
-}
-
-func (d *Div) SetA(a int) {
-	d.a = a
-}
-
-func (d *Div) SetB(b int) {
-	d.b = b
-}
-
-func (d Div) Wert() (int, error) {
-	if d.b == 0 {
-		return 0, fmt.Errorf("Teilen durch Null")
-	}
-	return d.a / d.b, nil
-}
-
-func (d Div) Operation() rune {
-	return '/'
-}
-
-func (d Div) A() int {
-	return d.a
-}
-
-func (d Div) B() int {
-	return d.b
-}
-
-func leseVerknupfung(symbol rune) (Verkn, error) {
-	switch symbol {
+// Wert führt die binäre Operation aus und gibt das Ergebnis zurück.
+func (p Binop) Wert() (Num, error) {
+	switch p.op {
 	case '+':
-		return &Summe{}, nil
+		return p.a + p.b, nil
 	case '-':
-		return &Reste{}, nil
+		return p.a - p.b, nil
 	case '*':
-		return &Mult{}, nil
+		return p.a * p.b, nil
 	case '/':
-		return &Div{}, nil
+		if p.b == 0 {
+			return 0, fmt.Errorf("Teilen durch Null")
+		}
+		return p.a / p.b, nil
 	default:
+		return 0, fmt.Errorf("Ungültige Operation %c", p.op)
+	}
+}
+
+// Operation gibt das Symbol der Operation zurück.
+func (p Binop) Operation() rune {
+	return p.op
+}
+
+// A gibt den Wert von Operand A zurück.
+func (p Binop) A() Num {
+	return p.a
+}
+
+// B gibt den Wert von Operand B zurück.
+func (p Binop) B() Num {
+	return p.b
+}
+
+// NeueBinop erzeugt eine neue Binop-Instanz mit der spezifizierten Operation.
+// Die Operanden werden spaeter mit set-Methoden gesetzt
+func NeueBinop(op rune) (*Binop, error) {
+	// Unterstuetzte Ops sind +,-,*,/
+	if !strings.ContainsRune("+-*/", op) {
 		return nil, ErrUngultigeOperation
 	}
+
+	return &Binop{
+		op: op,
+	}, nil
 }

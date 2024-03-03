@@ -9,7 +9,7 @@ func TestBaueAusdr(t *testing.T) {
 	tests := []struct {
 		name      string
 		input     string
-		want      int
+		want      Num
 		wantError bool
 	}{
 		{"Einfache Summe", "1 + 2", 3, false},
@@ -26,7 +26,7 @@ func TestBaueAusdr(t *testing.T) {
 			rd := strings.NewReader(tt.input)
 			a, err := baueAusdr(rd)
 
-			var wert int
+			var wert Num
 			var errWert error
 			if err == nil {
 				wert, errWert = a.Wert()
@@ -49,7 +49,7 @@ func TestBaueAusdrMitErweitertenFaellen(t *testing.T) {
 	tests := []struct {
 		name      string
 		input     string
-		want      int
+		want      Num
 		wantError bool
 	}{
 		{"Summe mit Leerzeichen", " 1 + 2 ", 3, false},
@@ -66,7 +66,7 @@ func TestBaueAusdrMitErweitertenFaellen(t *testing.T) {
 			rd := strings.NewReader(tt.input)
 			a, err := baueAusdr(rd)
 
-			var wert int
+			var wert Num
 			var errWert error
 			if err == nil {
 				wert, errWert = a.Wert()
